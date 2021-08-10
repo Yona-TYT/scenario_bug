@@ -1,7 +1,3 @@
-#__________________________________chapter 00___________________________________
-#__________________________________chapter 00___________________________________
-Checking Compatibility
-Checking Compatibility
 #__________________________________chapter 01___________________________________
 #__________________________________chapter 01___________________________________
 Getting Started
@@ -41,7 +37,7 @@ Stops should be built in [%s]
 Only %d stops are necessary.
 Only %d stops are necessary.
 Press the [Copy Backward] button, then set the Minimum Load and Month Wait Time at the first stop!.
-Press the [Copy Backward] button, then set Minimum Load and Depart after at the first stop!
+Press the [Copy Backward] button, then set the Minimum Load and Month Wait Time at the first stop!.
 You must build a stop in [%s] first
 You must build a stop in [%s] first
 You can only delete the stops.
@@ -124,10 +120,6 @@ Select the other station first
 Select the other station first
 Press [Ctrl] to build a tunnel entrance here
 Press [Ctrl] to build a tunnel entrance here
-You must use the tool to raise the ground here
-You must use the tool to raise the ground here
-The tunnel is not correct, use the [Remove] tool here
-The tunnel is not correct, use the [Remove] tool here
 The tunnel is already at the correct level
 The tunnel is already at the correct level
 The slope is ready.
@@ -140,8 +132,6 @@ You must lower the ground first
 You must lower the ground first
 First you must lower the layer level.
 First you must lower the layer level.
-First you must Upper the layer level.
-First you must Upper the layer level.
 Build a Tunnel here
 Build a tunnel here
 Modify the terrain here
@@ -176,6 +166,8 @@ The train cannot be shorter than [%d] tiles.
 #___________________________chapter 03 - Text labels____________________________
 Build Rails form here
 Build Rails here.
+Straight slope here!.
+Straight slope here!.
 Flat slope here!.
 Flat slope here!.
 Place a Tunnel here!.
@@ -357,7 +349,7 @@ The station at {pos} isn't your station
 The track is stuck, use the [Remove] tool here!
 The track is stuck, use the [Remove] tool here!
 The waittime in waystop {nr} '{name}' isn't {wait} {pos}
-Depart after in waystop {name} isn't {wait} {pos}
+The waittime in waystop {name} isn't {wait} {pos}
 The waystop {nr} '{name}' isn't on place {pos}
 The waystop {nr} ({name}) isn't on place {pos}
 The schedule list must not be empty.

@@ -1,34 +1,27 @@
-<p>
-En este capítulo los <em>Barcos</em> son protagonistas y con ellos vamos a transportar mercancías, pasajeros y correo.
-</p>
+En este capitulo los <em>Barcos</em> son protagonistas y con ellos vamos a transportar mercancÃ­as, pasajeros y correo.<br><br>
 <p>
 {scr}
 </p>
-<p>
-{txtst_01}Paso A</em> - Un Vistazo a las Fábricas<br>
+{txtst_01}Paso A</em> - Un Vistazo a las Fabricas</a><br>
 {step_01}
-</p>
-<p>
-{txtst_02}Paso B</em> - Colocando Muelles<br>
+
+{txtst_02}Paso B</em> - Colocando los Muelles</a><br>
 {step_02}
-</p>
-<p>
-{txtst_03}Paso C</em> - Colocando Astilleros<br>
+
+{txtst_03}Paso C</em> - Colocando Astillero</a><br>
 {step_03}
-</p>
-<p>
-{txtst_04}Paso D</em> - Conectando a los Proveedores<br>
+
+{txtst_04}Paso D</em> - Conectando a los Proveedores</a><br>
 {step_04}
-</p>
-<p>
-{txtst_05}Paso E</em> - Conectando al Consumidor<br>
+
+{txtst_05}Paso E</em> - Conectando al Consumidor</a><br>
 {step_05}
-</p>
-<p>
-{txtst_06}Paso F</em> - Muelles de Pasajeros<br>
+
+{txtst_06}Paso F</em> - Los Muelles de Pasajeros</a><br>
 {step_06}
-</p>
-<p>
-{txtst_07}Paso G</em> - Conectando Atracciones Turísticas<br>
+
+{txtst_07}Paso G</em> - Conectando el Turismo</a><br>
 {step_07}
-</p>
+
+<br>
+

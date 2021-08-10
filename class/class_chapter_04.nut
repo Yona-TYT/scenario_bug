@@ -78,7 +78,7 @@ class tutorial.chapter_04 extends basic_chapter
 	ship2_name = translate("SlowFerry")
 	ship2_name_obj = "SlowFerry"
 	ship2_load = 100
-	ship2_wait = 42282
+	ship2_wait = 16
 	line1_name = "Test 5"
 
 	//Script
@@ -147,25 +147,25 @@ class tutorial.chapter_04 extends basic_chapter
 			if(!correct_cov){
 				local a = 3
 				local b = 3
-				text = ttextfile("chapter_04/05_"+a+"-"+b+".txt")
+				text = ttextfile("chapter_04/05_"+set_step_ext(a,b)+".txt")
 				text.tx=ttext("<em>["+a+"/"+b+"]</em>")
 			}
 			else if (pot0==0){
 				local a = 1
 				local b = 3
-				text = ttextfile("chapter_04/05_"+a+"-"+b+".txt")
+				text = ttextfile("chapter_04/05_"+set_step_ext(a,b)+".txt")
 				text.tx=ttext("<em>["+a+"/"+b+"]</em>")
 			}
 			else if (pot1==0){
 				local a = 2
 				local b = 3
-				text = ttextfile("chapter_04/05_"+a+"-"+b+".txt")
+				text = ttextfile("chapter_04/05_"+set_step_ext(a,b)+".txt")
 				text.tx=ttext("<em>["+a+"/"+b+"]</em>")
 			}
 			else if (pot2==0){
 				local a = 3
 				local b = 3
-				text = ttextfile("chapter_04/05_"+a+"-"+b+".txt")
+				text = ttextfile("chapter_04/05_"+set_step_ext(a,b)+".txt")
 				text.tx=ttext("<em>["+a+"/"+b+"]</em>")
 			}
 			text.w1 = c1.href(" ("+c1.tostring()+")")+""
@@ -243,6 +243,9 @@ class tutorial.chapter_04 extends basic_chapter
 				return 5
 				break;
 			case 2:
+
+				set_all_rules(pl)
+
 				//Para los Muelles
 				local siz = dock_list1.len()
 				local c_list = dock_list1
@@ -629,7 +632,7 @@ class tutorial.chapter_04 extends basic_chapter
 					local selc = 0
 					local load = ship1_load
 					local time = ship1_wait
-					local c_list = sch_list1
+					local c_list = sch_list1 //[sch_list1[1], sch_list1[0]]
 					local siz = c_list.len()
 					return set_schedule_convoy(result, pl, cov, convoy, selc, load, time, c_list, siz)
 				}
@@ -930,10 +933,15 @@ class tutorial.chapter_04 extends basic_chapter
 
 		switch (this.step) {
 			case 1:
-				local forbid =	[	4097,4134,4135,tool_lower_land,tool_raise_land,tool_restoreslope,
-									tool_make_stop_public,tool_build_transformer,tool_build_station,
-									tool_build_way,tool_build_bridge,tool_build_depot,tool_remove_way
+				local forbid =	[	4129,tool_build_way,tool_build_bridge,tool_build_tunnel,tool_build_station,
+									tool_remove_way,tool_build_depot,tool_build_roadsign,tool_build_wayobj
 								]
+					foreach (tool_id in forbid)
+						rules.forbid_way_tool(pl, tool_id, wt_rail)
+
+					local forbid =	[	4097,4134,4135,tool_lower_land,tool_raise_land,tool_restoreslope,
+										tool_make_stop_public,tool_build_transformer
+									]
 				foreach (tool_id in forbid)
 					rules.forbid_tool(pl, tool_id )
 				break
@@ -985,16 +993,17 @@ class tutorial.chapter_04 extends basic_chapter
 					foreach (tool_id in forbid)
 						rules.forbid_way_tool(pl, tool_id, wt_rail )
 
-				local forbid = [tool_build_way,tool_build_bridge,tool_build_tunnel,tool_remove_way]
+				local forbid = [tool_build_way,tool_build_bridge,tool_build_tunnel,tool_remove_way,tool_remover]
 				foreach (tool_id in forbid)
 					rules.forbid_tool(pl, tool_id )	
 				break
 
 			case 7:
-				local forbid =	[	4097,4134,4135,tool_lower_land,tool_raise_land,tool_restoreslope,
-									tool_make_stop_public,tool_build_transformer,tool_build_station,
-									tool_build_way,tool_build_bridge,tool_build_depot,tool_remove_way
-								]
+				local forbid = [tool_build_tunnel,tool_build_depot,tool_build_roadsign,tool_build_wayobj]
+					foreach (tool_id in forbid)
+						rules.forbid_way_tool(pl, tool_id, wt_rail )
+
+				local forbid = [tool_build_depot,tool_build_way,tool_build_bridge,tool_build_tunnel,tool_remove_way]
 				foreach (tool_id in forbid)
 					rules.forbid_tool(pl, tool_id )
 				break
@@ -1007,11 +1016,11 @@ class tutorial.chapter_04 extends basic_chapter
 		local result = 0
 		local st = {all_correct = true, c = null, nr = 0}
 		local err_tx = translate("Dock No.%d must accept [%s]")
-		local siz = c_list.len()
-		for(local j=0;j<siz;j++){
+		for(local j=0;j<c_list.len();j++){
 			local tile = my_tile(c_list[j])
 			local halt = tile.get_halt()
 			local buil = tile.find_object(mo_building)
+			local label = tile.find_object(mo_label)
 			if(buil && st.all_correct){ 
 				local st_list = building_desc_x.get_available_stations(11/*building_desc_x.station*/, 3, good_desc_x(good))
 				local st_desc = buil.get_desc()
@@ -1034,23 +1043,16 @@ class tutorial.chapter_04 extends basic_chapter
 					if(st.all_correct) result = null
 				}	
 			}
-			else if(tool_id==tool_build_station && result!=null){
-				local c = coord(c_list[siz-j-1].x,c_list[siz-j-1].y)
-				local tile = my_tile(c)
-				local buil = tile.find_object(mo_building)
-				//local current_halt = my_tile(st.c).get_halt()
-				if(!buil)
-					result = translate("Place the stops at the marked points")+" ("+c.tostring()+")."
-			}
-			if (j == (siz-1)){
+			if (j == (c_list.len()-1)){
 
 				if (tool_id==tool_remover && !st.all_correct){
 					local current_halt = my_tile(st.c).get_halt()
 					if(current_halt){
 						local tile_list = current_halt.get_tile_list()
 						foreach(tile in tile_list){
-							if(pos.x == tile.x && pos.y == tile.y)
+							if(pos.x == tile.x && pos.y == tile.y){
 								return null
+							}
 						}
 					}
 				}

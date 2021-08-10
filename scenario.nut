@@ -4,15 +4,13 @@
  * 
  *  Can NOT be used in network game !
  */
-const version = 1600
+const version = 1550
 map.file = "tutorial.sve"
 scenario_name             <- "Tutorial Scenario"
 scenario.short_description = scenario_name
 scenario.author            = "Yona-TYT"
-scenario.version           = (version / 1000) + "." + ((version % 1000) / 100) + "." + ((version % 100) / 10) + (version % 10) +""
+scenario.version           = (version / 1000) + "." + ((version % 1000) / 100) + "." + ((version % 100) / 10) + (version % 10) +" Test"
 scenario.translation      <- ttext("Translator")
-
-resul_version <- {pak= false , st = false}
 
 const nut_path      = "class/"		// path to folder with *.nut files
 persistent.version <- version		// stores version of script
@@ -93,7 +91,7 @@ active_sch_check <- false
 tool_alias  <- {inspe = translate("Abfrage"), road= translate("ROADTOOLS"), rail = translate("RAILTOOLS"), ship = translate("SHIPTOOLS"), land = translate("SLOPETOOLS"), spec = translate("SPECIALTOOLS")}
 
 // placeholder for good names in pak64
-good_alias  <- {mail = "Post", passa= "Passagiere", goods = "Goods", wood = "Holz", plan = "Bretter", coal = "Kohle", oel = "Oel" , gas = "Gasoline"}
+good_alias  <- {mail = "Post", passa= "Passagiere", goods = "goods_", wood = "Holz", plan = "Bretter", coal = "Kohle", oel = "Oel" , gas = "Gasoline"}
 
 // table containing all system_types
 all_systemtypes <- [st_flat, st_elevated, st_runway, st_tram]
@@ -105,7 +103,7 @@ select_option_halt <- null			// placeholder for halt_x
 tutorial		  <- {}				// placeholder for all chapter CLASS
 
 include(nut_path+"class_basic_chapter") 		// include class for basic chapter structure
-for (local i = 0; i <= chapter_max; i++)		// include amount of chapter classes
+for (local i = 1; i <= chapter_max; i++)		// include amount of chapter classes
 	include(nut_path+"class_chapter_"+(i < 10 ? "0"+i:i) )
 chapter            <- tutorial.chapter_02      	// must be placed here !!!
 
@@ -115,7 +113,7 @@ function script_text()
 		gui.add_message(""+translate("Advance not allowed"))
 		return null
 	}
-	if(scr_jump){
+	if(true/*scr_jump*/){
 		local result = null
 		scr_jump = false
 		result = chapter.script_text()
@@ -134,51 +132,35 @@ function sum(a,b)
 
 function my_chapter()
 {
-	return "chapter_"+(chapter.chapter < 10 ? "0":"")+chapter.chapter+"/"
+	return "chapter_"+(persistent.chapter < 10 ? "0":"")+persistent.chapter+"/"
 }
 
 function scenario_percentage(percentage)
 {
-	return min( ((persistent.chapter == 0? 1-1 : persistent.chapter -1) * 100 + percentage) / tutorial.len(), 100 )
+	return min( ((persistent.chapter - 1) * 100 + percentage) / tutorial.len(), 100 )
 }
 
 function load_chapter(number,pl)
 {
     rules.clear()
-	if (!resul_version.pak || !resul_version.st){
-		number = 0
+	if (number <= tutorial.len() )		// replace the class
 		chapter = tutorial["chapter_"+(number < 10 ? "0":"")+number](pl)
+	else    persistent.chapter--
+	if ( (number == persistent.chapter) && (chapter.startcash > 0) )  // set cash money here
+		player_x(0).book_cash( (chapter.startcash - player_x(0).get_cash()[0]) * 100)
 
-		chapter.chapter = number
-	}
-	else{
-		if (number <= tutorial.len() )		// replace the class
-			chapter = tutorial["chapter_"+(number < 10 ? "0":"")+number](pl)
-		else    persistent.chapter--
-		if ( (number == persistent.chapter) && (chapter.startcash > 0) )  // set cash money here
-			player_x(0).book_cash( (chapter.startcash - player_x(0).get_cash()[0]) * 100)
-
-		chapter.chapter = persistent.chapter
-		persistent.step = persistent.status.step
-	}
+	persistent.step = persistent.status.step
 }
 
 function load_chapter2(number,pl)
 {
     rules.clear()
-	if (!resul_version.pak || !resul_version.st){
-		number = 0
-		chapter = tutorial["chapter_"+(number < 10 ? "0":"")+number](pl)
-		chapter.chapter = number
-	}
-	else{
-		chapter = tutorial["chapter_"+(number < 10 ? "0":"")+number](pl)
 
-		if ( (number == persistent.chapter) && (chapter.startcash > 0) )  // set cash money here
-			player_x(0).book_cash( (chapter.startcash - player_x(0).get_cash()[0]) * 100)
-			persistent.chapter = number
-			chapter.chapter = number
-	}
+	chapter = tutorial["chapter_"+(number < 10 ? "0":"")+number](pl)
+
+	if ( (number == persistent.chapter) && (chapter.startcash > 0) )  // set cash money here
+		player_x(0).book_cash( (chapter.startcash - player_x(0).get_cash()[0]) * 100)
+	persistent.chapter = number
 }
 
 function set_city_names()
@@ -200,7 +182,7 @@ function get_info_text(pl)
 		help+= "<em>"+translate("Chapter")+" "+(i)+"</em> - "+translate(tutorial["chapter_"+(i<10?"0":"")+i].chapter_name)+"<br>"
 	info.list_of_chapters = help
 
-	info.first_link = "<a href=\"goal\">"+(chapter.chapter <= 1 ? translate("Let's start!"):translate("Let's go on!") )+"  >></a>"
+	info.first_link = "<a href=\"goal\">"+(persistent.chapter <= 1 ? translate("Let's start!"):translate("Let's go on!") )+"  >></a>"
     return info
 }
 
@@ -269,7 +251,7 @@ function start()
 
 function is_scenario_completed(pl)
 {
-//gui.add_message(""+glsw[0]+"")
+gui.add_message(""+difftick_to_string(65535)+"")
 //gui.add_message("!!!!!"+persistent.step+" ch a "+st_nr[0]+"  !!!!! "+persistent.status.step+"  -- "+chapter.step+"")				
 	if (pl != 0) return 0			// other player get only 0%
 	if(fail_count==0){
@@ -307,6 +289,7 @@ function is_scenario_completed(pl)
 		return 0
 	}
 
+
 	//if(cov_delay>0) cov_delay--
 	chapter.step = persistent.step
 	local percentage = chapter.is_chapter_completed(pl)
@@ -320,14 +303,13 @@ function is_scenario_completed(pl)
 
 		persistent.chapter++
 		load_chapter(persistent.chapter, pl)
-		chapter.chapter = persistent.chapter
 		percentage = chapter.is_chapter_completed(pl)
 		 // ############## need update of scenario window
 
 		text.nextcname = translate(""+chapter.chapter_name+"")
 		text.coord = chapter.chapter_coord.tostring()
 		chapter.start_chapter()  //Para iniciar variables en los capitulos
-		if (persistent.chapter >1) gui.add_message(text.tostring())
+		gui.add_message(text.tostring()) //test
 	}
 	percentage = scenario_percentage(percentage)
 	if ( percentage >= 100 ) {		// scenario complete
@@ -374,6 +356,7 @@ function is_work_allowed_here(pl, tool_id, pos)
 		return result
 	}
 }
+
 
 function is_schedule_allowed(pl, schedule)
 {
@@ -435,9 +418,6 @@ convoy_x._save <- function()
 
 function resume_game()
 {	
-	//Check version and pakset name
-	resul_version = string_analyzer()
-
 	// Datos guardados
 	//-----------------------------------------------------	
 	// copy it piece by piece otherwise the reference 
@@ -579,92 +559,6 @@ function get_line_name(halt)
 		return "<em>"+line.get_name()+"</em>"
 	}
 	return "<s>not line</s>"
-}
-
-function string_analyzer()
-{
-	local result = {pak= false , st = false}
-
-	//Check version and pakset name
-	current_pak = get_pakset_name()
-	current_st = get_version_number()
-
-	local p_siz = {a = current_pak.len(), b = pak_name.len()}
-
-
-	//Pak name analyzer
-	local siz_a = max(p_siz.a, p_siz.a)
-	local count_a = 0
-	local tx_a = ""
-	for(local j=0;j<siz_a;j++){
-		try {
-			pak_name[count_a]
-		}
-		catch(ev) {
-			break
-		}
-		if(count_a>0 && current_pak[j]!=pak_name[count_a]){
-			break
-		}
-		if(current_pak[j]==pak_name[count_a]){
-			tx_a += format("%c",current_pak[j])
-			count_a++
-			continue
-		}
-	}
-	if(pak_name == tx_a) result.pak = true
-	//gui.add_message("Current: "+current_pak+"  Tx: "+tx_a+"  Pak: "+pak_name+" result: "+result.pak)
-
-	local s_siz = {a = current_st.len(), b = simu_version.len()}
-	local siz_b = max(s_siz.a, s_siz.a)
-
-	local nr_a = 0
-	local nr_b = 0
-
-	while(nr_a<s_siz.a || nr_b<s_siz.b){
-		local value_a = ""
-		for(local j=nr_a;j<s_siz.a;j++){
-			local tx = format("%c",current_st[j])
-			try {
-				tx.tointeger()
-			}
-			catch(ev) {
-				if(tx=="."){
-					nr_a = j+1
-					break
-				}
-				nr_a++
-				continue
-			}
-			value_a+=tx
-		}
-
-		local value_b = ""
-		for(local j=nr_b;j<s_siz.b;j++){
-			local tx = format("%c",simu_version[j])
-			if(tx=="."){
-				nr_b = j+1
-				break
-			}
-			value_b+=tx
-			if(j == s_siz.b-1)nr_b = s_siz.b
-		}
-		try {
-			value_a.tointeger()
-			value_b.tointeger()
-		}
-		catch(ev) {
-			continue
-		}
-		//gui.add_message("value_a "+value_a.tointeger()+"  value_b "+value_b.tointeger()+"")
-		if(value_a.tointeger()<value_b.tointeger()){
-			result.st = false
-			break
-		}
-		result.st = true
-	}
-	//gui.add_message("result st: "+result.st+"  result pak:" +result.pak)
-	return result
 }
 
 // END OF FILE

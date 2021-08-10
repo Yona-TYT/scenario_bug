@@ -45,10 +45,9 @@ class tutorial.chapter_05 extends basic_chapter
 	c_dep1_lim = {a = coord(131,232), b = coord(132,232)}
 	c_dep1 = coord(131,232)
 	
-	//Para el Camion
 	sch_list1 = [coord(132,233), coord(131,209)]
-	veh1_name = translate("Sandtransporter")
-    veh1_obj = "Sandtransporter"
+	veh1_name = translate("Kohletransporter")
+    veh1_obj = "Kohletransporter"
 	veh1_load = 100
 	veh1_wait = 0
 	d1_cnr = 10
@@ -76,7 +75,7 @@ class tutorial.chapter_05 extends basic_chapter
     c_dep2 = coord(115,185) // depot
 	line1_name = "Test 6"
 	veh2_load = 100
-	veh2_wait = 10571
+	veh2_wait = 12
 	d2_cnr = 3
 
 	//Para el barco
@@ -84,7 +83,7 @@ class tutorial.chapter_05 extends basic_chapter
     veh3_name = translate("Postschiff")
     veh3_obj = "Postschiff"
 	veh3_load = 100
-	veh3_wait = 42282
+	veh3_wait = 16
     c_dep3 = coord(150,190) // depot
 
 	//Script
@@ -92,7 +91,7 @@ class tutorial.chapter_05 extends basic_chapter
 	sc_way_name = "asphalt_road"
 	sc_station_name = "CarStop"
 	sc_dep_name = "CarDepot"
-	sc_trail_name = "Sandanhaenger"
+	sc_trail_name = "Kohleanhaenger"
 	sc_trail_nr = 1
 
 	sc_power_name = "Powerline"
@@ -232,7 +231,6 @@ class tutorial.chapter_05 extends basic_chapter
 			text.cir = cov_cir
 			text.load = veh2_load
 			text.wait = get_wait_time_text(veh2_wait)
-			text.nr = siz
 		}
         if (pot2==1 && pot3==0 || !correct_cov){
 			text = ttextfile("chapter_05/04_3-3.txt")
@@ -264,7 +262,6 @@ class tutorial.chapter_05 extends basic_chapter
 			text.ship = veh3_name
 			text.load = veh3_load
 			text.wait = get_wait_time_text(veh3_wait)
-			text.nr = siz
 		}
 		break
 		case 5:
@@ -391,17 +388,20 @@ class tutorial.chapter_05 extends basic_chapter
 			break;
 			case 3:
                 if (pot0==0){
+					local transf_count = 0
                     for(local j=0;j<transf_list.len();j++){
                         local tile = my_tile(transf_list[j])
                         local f_transfc = tile.find_object(mo_transformer_c)
                         local f_transfs = tile.find_object(mo_transformer_s)
                         if (f_transfc || f_transfs){
                             glsw[j]=1
+							transf_count++
                         }
                         else
                             label_x.create(transf_list[j], player_x(0), translate("Transformer Here!."))
                     }
-                    if( glsw[0]==1 && glsw[1]==1 && glsw[2]==1 && glsw[3]==1){
+
+					if(transf_count == transf_list.len()){
                         pot0 = 1
 						reset_glsw()
 
@@ -417,11 +417,10 @@ class tutorial.chapter_05 extends basic_chapter
 							label_bord(label_del[j].a, label_del[j].b, opt, del, "X")
 						}
                         return 20
-                    }  
+                    }   
                 }
                 else if (pot0==1 && pot1 == 0){
 					local f_list = c_fab_list
-					local pow_list = [0,0,0,0]
 					local f_tile_t = my_tile(transf_list[3])
 					local f_transf = f_tile_t.find_object(mo_transformer_s)
 			           // f_power = 0
@@ -429,21 +428,15 @@ class tutorial.chapter_05 extends basic_chapter
 						local tile = my_tile(f_list[j])
 						local factory = tile.find_object(mo_building).get_factory()
 						if (factory){
-						    if(script_test && factory.is_transformer_connected()){
+						    if(factory.is_transformer_connected()){
 						        local transf = factory.get_transformer()
 						        if (transf.is_connected(f_transf)){
 									glsw[j] = 1
 						        }
 						    }
-						    else{
-						        pow_list[j] = factory.get_power()[0]
-						        f_pow_list[j] = pow_list[j]
-						        if (pow_list[j] != 0)
-									glsw[j] = 1
-						    }
 						}  
 					}              
-					if (glsw[0] == 1 && glsw[1] == 1 && glsw[2] == 1){
+					if (glsw[0] == 1 && glsw[1] == 1 && glsw[2] == 1 && glsw[3] == 1){
 						//Elimina cuadro label para las power line
 						local opt = 0
 						local del = true
@@ -810,7 +803,7 @@ class tutorial.chapter_05 extends basic_chapter
 				if (current_cov> ch5_cov_lim2.a && current_cov< ch5_cov_lim2.b){
 					local cov = d2_cnr
 					local veh = 1
-					local good_list = [good_desc_x(good_alias.mail).get_catg_index()] 	 //Mail
+					local good_list = [good_desc_x(good_alias.mail).get_catg_index()]	 //Mail
 					local name = veh2_obj
 					local st_tile = 1
 
@@ -952,53 +945,28 @@ class tutorial.chapter_05 extends basic_chapter
 						local err = tool.work(player_x(0), tile, sc_transf_name)
                       	glsw[j]=1
                     }
-                    if( glsw[0]==1 && glsw[1]==1 && glsw[2]==1 && glsw[3]==1){
-                        pot0 = 1
-						reset_glsw()
+                    pot0 = 1
+					reset_glsw()
 
-                        //Elimina cudro label
-						local opt = 0
-                        local del = true
-						label_bord(label_del[0].a, label_del[0].b, opt, del, "X")
-						label_bord(label_del[1].a, label_del[1].b, opt, del, "X")
-                    }
+                    //Elimina cudro label
+					local opt = 0
+                    local del = true
+					label_bord(label_del[0].a, label_del[0].b, opt, del, "X")
+					label_bord(label_del[1].a, label_del[1].b, opt, del, "X")
                     
                 }
                 if (pot0==1 && pot1 == 0){
-		            local f_list = c_fab_list
-		            local pow_list = [0,0,0,0]
-		            local f_tile_t = my_tile(transf_list[3])
-		            local f_transf = f_tile_t.find_object(mo_transformer_s)
-
-                    local c1_waya = my_tile(transf_list[3])
-                    local c1_wayb = my_tile(transf_list[0])
-
-                    local c2_waya = my_tile(transf_list[3])
-                    local c2_wayb = my_tile(transf_list[2])
-
-                    local c3_waya = my_tile(transf_list[2])
-                    local c3_wayb = my_tile(transf_list[1])
-
 					local tool = command_x(tool_build_way)
-					local t_name = sc_power_name
-
-					tool.work(player_x(0), c1_waya, c1_wayb, t_name)
-					tool.work(player_x(0), c2_waya, c2_wayb, t_name)
-					tool.work(player_x(0), c3_waya, c3_wayb, t_name)
-
-                  	glsw[0]=1
-                  	glsw[1]=1
-                  	glsw[2]=1
-                               
-					if (glsw[0] == 1 && glsw[1] == 1 && glsw[2] == 1){
-					  //Elimina cuadro label para las power line
-					  local opt = 0
-					  local del = true
-					  label_bord(pow_lim[0].a, pow_lim[0].b, opt, del, "X")
-					  label_bord(pow_lim[1].a, pow_lim[1].b, opt, del, "X")
-					  label_bord(pow_lim[2].a, pow_lim[2].b, opt, del, "X")
-
-					} 
+					local powline_name = sc_power_name
+					local nr = transf_list.len()/2
+					for(local j=0;j<nr;j++){
+						local tile_a = my_tile(transf_list[j])
+						local tile_b = my_tile(transf_list[j+1])
+						local tile_c = my_tile(transf_list[j+nr])
+						local tile_d = my_tile(transf_list[(transf_list.len()-j)-(1)])
+						tool.work(player_x(0), tile_a, tile_b, powline_name)
+						tool.work(player_x(0), tile_c, tile_d, powline_name)
+					}	
            		}
 				return null
 				break;
@@ -1123,46 +1091,27 @@ class tutorial.chapter_05 extends basic_chapter
 		foreach (tool_id in forbid)
 		    rules.forbid_tool(pl, tool_id)
 
-		switch (this.step) {
-			case 1:
-				local forbid =	[	4097,4134,4135,tool_lower_land,tool_raise_land,tool_restoreslope,tool_build_way,
-									tool_make_stop_public,tool_build_transformer,tool_build_station,
-									tool_build_bridge,tool_build_depot,tool_remove_way,tool_build_tunnel
-								]
-				foreach (tool_id in forbid)
-					rules.forbid_tool(pl, tool_id )
-			break
+        if (this.step == 2){
+		    local forbid = [tool_remove_wayobj, tool_build_bridge, tool_build_tunnel, tool_build_roadsign, tool_build_wayobj]
 
-			case 2:
-				local forbid = [tool_remove_wayobj, tool_build_bridge, tool_build_tunnel, tool_build_roadsign, tool_build_wayobj]
+		    foreach(wt in all_waytypes)
+			    if (wt != wt_power) {
+			        foreach (tool_id in forbid)
+				        rules.forbid_way_tool(pl, tool_id, wt )
+			}
+        }
 
-				foreach(wt in all_waytypes)
-					if (wt != wt_power) {
-					    foreach (tool_id in forbid)
-						    rules.forbid_way_tool(pl, tool_id, wt )
-				}
-			break
+        if (this.step == 3){
+		    local forbid = [tool_remove_wayobj, tool_build_way, tool_build_bridge, tool_build_tunnel, tool_build_station,
+                           tool_remove_way, tool_build_depot, tool_build_roadsign, tool_build_wayobj]
 
-			case 3:
-				local forbid = [tool_remove_wayobj, tool_build_way, tool_build_bridge, tool_build_tunnel, tool_build_station,
-		                       tool_remove_way, tool_build_depot, tool_build_roadsign, tool_build_wayobj]
-
-				foreach(wt in all_waytypes)
-					if (wt != wt_power) {
-					    foreach (tool_id in forbid)
-						    rules.forbid_way_tool(pl, tool_id, wt )
-				}
-		        rules.forbid_tool(pl, tool_build_station)
-			break
-
-			case 4:
-				local forbid =	[	tool_build_transformer,tool_build_way,
-									tool_build_bridge,tool_build_depot,tool_remove_way,tool_build_tunnel
-								]
-				foreach (tool_id in forbid)
-					rules.forbid_tool(pl, tool_id )
-			break
-		}
+		    foreach(wt in all_waytypes)
+			    if (wt != wt_power) {
+			        foreach (tool_id in forbid)
+				        rules.forbid_way_tool(pl, tool_id, wt )
+			}
+            rules.forbid_tool(pl, tool_build_station)
+        }
 	}
 
     function delete_objet(pl, c_list, obj, lab_name, station = false)
